@@ -11,10 +11,7 @@ class MineSweeper(QWidget):
 
     def initUI(self):
 
-        grid = self.generate_grid()
-        grid[0][0] = 'nm'
-        for line in grid:
-            print(line)
+        grid,self.buttongrid = self.generate_grid()
 
         for width in range(10):
             for height in range(10):
@@ -22,10 +19,10 @@ class MineSweeper(QWidget):
                 if type == 'nm':
                     nMines = self.calculateNumber(grid,width,height)
                     type = nMines
-                btn = Button('',parent=self,state=type)
-
+                btn = Button('',parent=self,state=type,w=width,h=height)
                 btn.setGeometry(200,150,20,20)
                 btn.move(width*20+40,height*20+40)
+                self.buttongrid[width][height] = btn
 
 
         self.setGeometry(300,300,300,300)
@@ -36,16 +33,20 @@ class MineSweeper(QWidget):
     def generate_grid(self):
         ##Randomly assign where mines are generated, 10 percent chance
         totalgrid = []
+        buttongrid = []
         for w in range(10):
             row = []
+            buttonrow = []
             for h in range(10):
                 r = random.random()
-                if r < 0.3:
+                buttonrow.append(0)
+                if r < 0.1:
                     row.append('m')
                 else:
                     row.append('nm')
             totalgrid.append(row)
-        return totalgrid
+            buttongrid.append(buttonrow)
+        return totalgrid, buttongrid
 
     def calculateNumber(self,grid,w,h):
         number = 0
@@ -62,21 +63,43 @@ class MineSweeper(QWidget):
                         number += 1
         return number
 
+    def collapse(self,button,w,h):
+        currentW = button.width
+        currentH = button.height
+        for x in range(-1,2,1):
+            for y in range(-1,2,1):
+                xcoord = currentW+x
+                ycoord = currentH+y
+                if -1 < xcoord < len(self.buttongrid[0]) and -1 < ycoord < len(self.buttongrid[0]):
+                    btn = self.buttongrid[xcoord][ycoord]
+                    if btn.checked == False:
+                        btn.click()
+
+
+
+
 
 
 class Button(QPushButton):
-    def __init__(self,Text,parent=None,state=None):
+    def __init__(self,Text,parent=None,state=None,w=None,h=None):
         super(Button,self).__init__(parent)
+        self.parent = parent
         self.setupbutton()
         self.state = state
+        self.width = w
+        self.height = h
+        self.checked = False
 
     def setupbutton(self):
         self.clicked.connect(self.pressed)
 
-
     def pressed(self):
+        self.checked = True
         if self.state == 'm':
             self.sender().setIcon(QIcon('mine.png'))
+        elif self.state == 0:
+            self.parent.collapse(self, self.width,self.height)
+            self.setStyleSheet("background-color: #6a6461")
         else:
             self.sender().setText(str(self.state))
 
