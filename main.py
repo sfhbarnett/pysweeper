@@ -24,10 +24,17 @@ class MineSweeper(QWidget):
                 btn.move(width*20+40,height*20+40)
                 self.buttongrid[width][height] = btn
 
+        self.Flagbtn = QPushButton('',self)
+        self.Flagbtn.setIcon(QIcon('flag.png'))
+        self.Flagbtn.setGeometry(80, 10, 20, 20)
+        self.Flagbtn.move(80, 10)
+        self.Flagbtn.clicked.connect(self.setFlagMode)
 
         self.setGeometry(300,300,300,300)
         self.setWindowTitle('MineSweeper')
         self.show()
+
+        self.flagstate = -1
 
 
     def generate_grid(self):
@@ -64,6 +71,8 @@ class MineSweeper(QWidget):
         return number
 
     def collapse(self,button,w,h):
+        #Performs the floodfill to fill in all zero squares and reveal edge numbers
+        #Need to change so it's 4 connectivity instead of 8
         currentW = button.width
         currentH = button.height
         for x in range(-1,2,1):
@@ -75,9 +84,12 @@ class MineSweeper(QWidget):
                     if btn.checked == False:
                         btn.click()
 
-
-
-
+    def setFlagMode(self):
+        self.flagstate *= -1
+        if self.flagstate == -1:
+            self.Flagbtn.setStyleSheet("background-color: light gray")
+        else:
+            self.Flagbtn.setStyleSheet("background-color: #6a6461")
 
 
 class Button(QPushButton):
@@ -89,19 +101,25 @@ class Button(QPushButton):
         self.width = w
         self.height = h
         self.checked = False
+        self.flag = False
 
     def setupbutton(self):
         self.clicked.connect(self.pressed)
 
     def pressed(self):
-        self.checked = True
-        if self.state == 'm':
-            self.sender().setIcon(QIcon('mine.png'))
-        elif self.state == 0:
-            self.parent.collapse(self, self.width,self.height)
-            self.setStyleSheet("background-color: #6a6461")
+        if self.parent.flagstate != 1 and self.flag == False:
+            self.checked = True
+            if self.state == 'm':
+                self.sender().setIcon(QIcon('mine.png'))
+            elif self.state == 0:
+                self.parent.collapse(self, self.width,self.height)
+                self.setStyleSheet("background-color: #6a6461")
+            else:
+                self.sender().setText(str(self.state))
         else:
-            self.sender().setText(str(self.state))
+            self.sender().setIcon(QIcon('flag.png'))
+            self.checked = True
+            self.flag = True
 
 
 def main():
