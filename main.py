@@ -8,14 +8,17 @@ class MineSweeper(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.GameState = True
         self.initUI()
 
     def initUI(self):
+        sizeW = 12
+        sizeH = 12
 
-        grid, self.buttongrid = self.generate_grid()
+        grid, self.buttongrid = self.generate_grid(sizeW, sizeH)
 
-        for width in range(10):
-            for height in range(10):
+        for width in range(sizeW):
+            for height in range(sizeH):
                 type = grid[width][height]
                 if type == 'nm':
                     nMines = self.calculateNumber(grid, width, height)
@@ -37,14 +40,14 @@ class MineSweeper(QWidget):
 
         self.flagstate = -1
 
-    def generate_grid(self):
+    def generate_grid(self,sizeW,sizeH):
         # Randomly assign where mines are generated, 10 percent chance
         totalgrid = []
         buttongrid = []
-        for w in range(10):
+        for w in range(sizeW):
             row = []
             buttonrow = []
-            for h in range(10):
+            for h in range(sizeH):
                 r = random.random()
                 buttonrow.append(0)
                 if r < 0.1:
@@ -55,10 +58,10 @@ class MineSweeper(QWidget):
             buttongrid.append(buttonrow)
         return totalgrid, buttongrid
 
-    def calculateNumber(self,grid,w,h):
+    def calculateNumber(self, grid, w, h):
         number = 0
-        for x in range(-1,2,1):
-            for y in range(-1,2,1):
+        for x in range(-1, 2, 1):
+            for y in range(-1, 2, 1):
                 middle = 0
                 xcoord = w+x
                 ycoord = h+y
@@ -72,7 +75,6 @@ class MineSweeper(QWidget):
 
     def collapse(self, button):
         # Performs the floodfill to fill in all zero squares and reveal edge numbers
-        # Need to change so it's 4 connectivity instead of 8
         currentW = button.width
         currentH = button.height
         compass = [[-1,0],[1,0],[0,-1],[0,1]]
@@ -83,7 +85,7 @@ class MineSweeper(QWidget):
                 btn = self.buttongrid[xcoord][ycoord]
                 if btn.checked is False:
                     btn.click()
-
+        # 8-connectivity
         # for x in range(-1, 2, 1):
         #     for y in range(-1, 2, 1):
         #         xcoord = currentW+x
@@ -116,7 +118,7 @@ class Button(QPushButton):
         self.clicked.connect(self.pressed)
 
     def pressed(self):
-        if self.parent.flagstate != 1 and self.flag == False:
+        if self.parent.flagstate != 1 and self.flag is False:
             self.checked = True
             if self.state == 'm':
                 self.sender().setIcon(QIcon('mine.png'))
@@ -125,7 +127,7 @@ class Button(QPushButton):
                 self.setStyleSheet("background-color: #6a6461")
             else:
                 self.sender().setText(str(self.state))
-        elif self.parent.flagstate == 1 and self.flag == True:
+        elif self.parent.flagstate == 1 and self.flag is True:
             self.checked = False
             self.flag = False
             self.sender().setIcon(QIcon(''))
