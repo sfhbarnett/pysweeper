@@ -116,6 +116,9 @@ class Button(QPushButton):
                 self.setStyleSheet("background-color: #6a6461")
             else:
                 self.sender().setText(str(self.state))
+        elif self.parent.flagstate == 1 and self.flag == True:
+            self.checked = False
+            self.sender().setIcon(QIcon(''))
         else:
             self.sender().setIcon(QIcon('flag.png'))
             self.checked = True
