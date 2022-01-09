@@ -12,8 +12,8 @@ class MineSweeper(QWidget):
         self.initUI()
 
     def initUI(self):
-        sizeW = 12
-        sizeH = 12
+        sizeW = 40
+        sizeH = 40
 
         grid, self.buttongrid = self.generate_grid(sizeW, sizeH)
 
@@ -50,7 +50,7 @@ class MineSweeper(QWidget):
             for h in range(sizeH):
                 r = random.random()
                 buttonrow.append(0)
-                if r < 0.1:
+                if r < 0.2:
                     row.append('m')
                 else:
                     row.append('nm')
@@ -77,6 +77,7 @@ class MineSweeper(QWidget):
         # Performs the floodfill to fill in all zero squares and reveal edge numbers
         currentW = button.width
         currentH = button.height
+        # 4-connectivity
         compass = [[-1,0],[1,0],[0,-1],[0,1]]
         for p in compass:
             xcoord = currentW + p[0]
@@ -131,7 +132,7 @@ class Button(QPushButton):
             self.checked = False
             self.flag = False
             self.sender().setIcon(QIcon(''))
-        else:
+        elif self.parent.flagstate == 1 and self.checked is False:
             self.sender().setIcon(QIcon('flag.png'))
             self.checked = True
             self.flag = True
